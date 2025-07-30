@@ -1,8 +1,10 @@
 package com.laze.springwebfluxpractice.controller;
 
 import com.laze.springwebfluxpractice.dto.UserCreateRequest;
+import com.laze.springwebfluxpractice.dto.UserPostResponse;
 import com.laze.springwebfluxpractice.dto.UserResponse;
 import com.laze.springwebfluxpractice.dto.UserUpdateRequest;
+import com.laze.springwebfluxpractice.service.PostServiceR2dbc;
 import com.laze.springwebfluxpractice.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -10,12 +12,15 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.stream.Collectors;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/users")
 public class UserController {
 
     private final UserService userService;
+    private final PostServiceR2dbc postServiceR2dbc;
 
     @PostMapping
     public Mono<UserResponse> createUser(@RequestBody UserCreateRequest request) {
@@ -48,5 +53,16 @@ public class UserController {
         return userService.update(id, request.getName(),  request.getEmail())
                 .map(user -> ResponseEntity.ok(UserResponse.of(user)))
                 .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
+    }
+
+    @DeleteMapping("/search")
+    public Mono<ResponseEntity<?>> deleteUserByName(@RequestParam String name) {
+        return userService.deleteByName(name).then(Mono.just(ResponseEntity.noContent().build()));
+    }
+
+    @GetMapping("/{id}/posts")
+    public Flux<UserPostResponse> getUserPosts(@PathVariable Long id) {
+        return postServiceR2dbc.findAllByUserId(id)
+                .map(UserPostResponse::of);
     }
 }

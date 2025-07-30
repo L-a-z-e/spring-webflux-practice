@@ -30,6 +30,10 @@ public class PostServiceR2dbc {
         return postR2dbcRepository.findById(id);
     }
 
+    public Flux<Post> findAllByUserId(Long userId) {
+        return postR2dbcRepository.findAllByUserId(userId);
+    }
+
     // delete
     public Mono<Void> deleteById(Long id) {
         return postR2dbcRepository.deleteById(id);

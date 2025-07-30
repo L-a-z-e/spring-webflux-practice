@@ -39,4 +39,8 @@ public class UserService {
                     return userR2dbcRepository.save(user);
                 });
     }
+
+    public Mono<Void> deleteByName(String name) {
+        return userR2dbcRepository.deleteByName(name);
+    }
 }
